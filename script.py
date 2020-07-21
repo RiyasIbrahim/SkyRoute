@@ -7,17 +7,18 @@ from landmark_choices import landmark_choices
 landmark_string = ""
 for letter, landmark in landmark_choices.items():
     landmark_string += "{0} - {1}\n".format(letter, landmark)
+stations_under_construction = []
+
+def skyroute():
+    greet()
+    new_route()
+    goodbye()
 
 def greet():
     print("Hi there and welcome to SkyRoute!")
     print("We'll help you find the shortest \
     route between the following Vancouver \
     landmarks:\n" + landmark_string)
-
-def skyroute():
-    greet()
-    new_route()
-    goodbye()
 
 def set_start_and_end(start_point, end_point):
     if start_point:
@@ -61,13 +62,28 @@ def get_end():
         data on. Let's try this again...")
         get_end()
 
+def get_active_stations():
+    updated_metro = vc_metro
+    for station_under_construction in stations_under_construction:
+        for current_station, neighboring_station in vc_metro.items():
+            if current_station != station_under_construction:
+                updated_metro[current_station] -= stations_under_construction
+            else:
+                updated_metro[current_station] = set([])
+    return updated_metro
+
 def new_route(start_point = None, end_point = None):
     start_point, end_point = set_start_and_end(start_point, end_point)
     shortest_route = get_route(start_point, end_point)
-    shortest_route_string = '\n'.join(shortest_route)
-    print("The shortest metro route from {0} \
-    to {1} is:\n{2}".format(start_point, end_point,
-    shortest_route_string))
+    if shortest_route:
+        shortest_route_string = '\n'.join(shortest_route)
+        print("The shortest metro route from {0} \
+        to {1} is:\n{2}".format(start_point, end_point,
+        shortest_route_string))
+    else:
+        print("Unfortunately, there is currently \
+        no path between {0} and {1} due to \
+        maintenance.".format(start_point, end_point))
     again = input("Would you like to see another \
     route?\nEnter y/n: ")
     if again == 'y':
@@ -80,14 +96,18 @@ def show_landmarks():
     if see_landmarks == 'y':
         print(landmark_string)
 
-
 def get_route(start_point, end_point):
     start_stations = vc_landmarks[start_point]
     end_stations = vc_landmarks[end_point]
     routes = []
     for start_station in start_stations:
         for end_station in end_stations:
-            route = bfs(vc_metro, start_station, end_station)
+            metro_system = get_active_stations if stations_under_construction else vc_metro
+            if stations_under_construction:
+                possible_route = dfs(metro_system, start_station, end_station)
+                if not possible_route:
+                    return None
+            route = bfs(metro_system, start_station, end_station)
             if route:
                 routes.append(route)
     shortest_route = min(routes, key=len)
