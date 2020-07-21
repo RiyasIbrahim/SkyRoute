@@ -17,6 +17,7 @@ def greet():
 def skyroute():
     greet()
     new_route()
+    goodbye()
 
 def set_start_and_end(start_point, end_point):
     if start_point:
@@ -67,6 +68,17 @@ def new_route(start_point = None, end_point = None):
     print("The shortest metro route from {0} \
     to {1} is:\n{2}".format(start_point, end_point,
     shortest_route_string))
+    again = input("Would you like to see another \
+    route?\nEnter y/n: ")
+    if again == 'y':
+        show_landmarks()
+        new_route(start_point, end_point)
+
+def show_landmarks():
+    see_landmarks = input("Would you like to see the \
+    list of landmarks again?\nEnter y/n: ")
+    if see_landmarks == 'y':
+        print(landmark_string)
 
 
 def get_route(start_point, end_point):
@@ -80,5 +92,8 @@ def get_route(start_point, end_point):
                 routes.append(route)
     shortest_route = min(routes, key=len)
     return shortest_route
+
+def goodbye():
+    print("\nThanks for using SkyRoute\n!")
 
 skyroute()
